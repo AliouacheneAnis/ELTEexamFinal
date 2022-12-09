@@ -1,0 +1,181 @@
+{
+  "ruleChain": {
+    "additionalInfo": {
+      "description": ""
+    },
+    "name": "RPC uC",
+    "type": "CORE",
+    "firstRuleNodeId": null,
+    "root": false,
+    "debugMode": false,
+    "configuration": null
+  },
+  "metadata": {
+    "firstNodeIndex": 0,
+    "nodes": [
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 346,
+          "layoutY": 167
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbJsFilterNode",
+        "name": "Script",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "return msg.CptVal > 0 && msg.StatusMotor > 0 && msg.StatusLEDRGB > 0 ;"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 704,
+          "layoutY": 48
+        },
+        "type": "org.thingsboard.rule.engine.action.TbCreateAlarmNode",
+        "name": "Create Alarm",
+        "debugMode": true,
+        "configuration": {
+          "alarmType": "Critical Temperature",
+          "alarmDetailsBuildJs": "var details = {};\nif (metadata.prevAlarmDetails) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\nreturn details;",
+          "severity": "CRITICAL",
+          "propagate": true
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 967,
+          "layoutY": 41
+        },
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "Status True",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "var newMsg = {};\nnewMsg.method = 'Status';\nmsgType = 'RPC message';\nnewMsg.params = 'ON';\n\nreturn {msg: newMsg, metadata: metadata, msgType: msgType}; "
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1515,
+          "layoutY": 48
+        },
+        "type": "org.thingsboard.rule.engine.rpc.TbSendRPCRequestNode",
+        "name": "Status True",
+        "debugMode": true,
+        "configuration": {
+          "timeoutInSeconds": 60
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1230,
+          "layoutY": 44
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbJsFilterNode",
+        "name": "Check RPC msg",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "return msgType == 'RPC message'; "
+        }
+      },
+      {
+        "additionalInfo": {
+          "layoutX": 698,
+          "layoutY": 274
+        },
+        "type": "org.thingsboard.rule.engine.action.TbClearAlarmNode",
+        "name": "Clear Alarm",
+        "debugMode": false,
+        "configuration": {
+          "alarmType": "Critical Temperature",
+          "alarmDetailsBuildJs": "var details = {};\nif (metadata.prevAlarmDetails) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\nreturn details;"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 978,
+          "layoutY": 283
+        },
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "Status False",
+        "debugMode": false,
+        "configuration": {
+          "jsScript": "var newMsg = {};\nnewMsg.method = 'Status';\nmsgType = 'RPC message';\nnewMsg.params = 'OFF';\n\nreturn {msg: newMsg, metadata: metadata, msgType: msgType}; "
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1530,
+          "layoutY": 286
+        },
+        "type": "org.thingsboard.rule.engine.rpc.TbSendRPCRequestNode",
+        "name": "Status False",
+        "debugMode": true,
+        "configuration": {
+          "timeoutInSeconds": 60
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1266,
+          "layoutY": 282
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbJsFilterNode",
+        "name": "Check RPC msg",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "return msgType == 'RPC message'; "
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 0,
+        "toIndex": 1,
+        "type": "True"
+      },
+      {
+        "fromIndex": 0,
+        "toIndex": 5,
+        "type": "False"
+      },
+      {
+        "fromIndex": 1,
+        "toIndex": 2,
+        "type": "Created"
+      },
+      {
+        "fromIndex": 2,
+        "toIndex": 4,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 4,
+        "toIndex": 3,
+        "type": "True"
+      },
+      {
+        "fromIndex": 5,
+        "toIndex": 6,
+        "type": "Cleared"
+      },
+      {
+        "fromIndex": 6,
+        "toIndex": 8,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 8,
+        "toIndex": 7,
+        "type": "True"
+      }
+    ],
+    "ruleChainConnections": null
+  }
+}
